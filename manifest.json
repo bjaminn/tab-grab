@@ -1,0 +1,13 @@
+{
+  "name": "TabGrab",
+  "description": "Capture all the tabs on a single page.",
+  "version": "0.3",
+  "permissions": ["tabs"],
+  "background": {
+    "service_worker": "dist/js/service-worker.js"
+  },
+  "action": {
+    "default_title": "Show tab inspector"
+  },
+  "manifest_version": 3
+}

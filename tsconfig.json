@@ -1,0 +1,23 @@
+{
+    "compilerOptions": {
+        "strict": true,
+        "target": "ESNext",
+        "module": "ESNext",
+        "esModuleInterop": true,
+        "sourceMap": false,
+        "rootDir": "",
+        "outDir": "dist/js",
+        "noEmitOnError": true,
+        "jsx": "react",
+        "lib": [
+            "ESNext",
+            "DOM"
+        ],
+        "types": [
+            "chrome"
+        ],
+        "typeRoots": [
+            "node_modules/@types"
+        ]
+    }
+}
