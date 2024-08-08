@@ -47,7 +47,7 @@ async function RefreshTabs() {
     for (const tabGroup of tabGroups) {
         root.append(
             div({ class: "column" },
-                h1(`${tabGroup.windowLabel} ${tabGroup.windowId}`),
+                // h1(`${tabGroup.windowLabel} ${tabGroup.windowId}`),
                 ...(tabGroup.tabs.map(t => tabComponent(t)))
             ))
     }
@@ -56,7 +56,8 @@ async function RefreshTabs() {
     console.log("RefreshTabs()")
 }
 
-async function JumpToTab(windowId?: number, tabId?: number) {
+async function JumpToTab(windowId?: number, tabId?: number, ev?: MouseEvent) {
+    console.log(ev);
     if (!windowId) return;
     if (!tabId) return;
 
@@ -86,11 +87,13 @@ function resetButton() {
 function tabComponent(tab: chrome.tabs.Tab) {
     return (
         div({ class: "tab-box" },
-            img({ alt: "(close tab)", src: "img/x-circle-close-delete.svg", class: "btn-link", onclick: () => CloseTab(tab.id) }),
-            img({ alt: "(jump to tab)", src: "img/jump-link.svg", class: "btn-link", onclick: () => JumpToTab(tab.windowId, tab.id) }),
-            div({ style: `background-image: url('${tab.favIconUrl}')`, class: "btn-link" }),
-            a({ href: tab.url },
-                document.createTextNode(tab.title ?? tab.id?.toString() ?? "{oops}"))
+            div({ style: `background-image: url('${tab.favIconUrl}')`, class: "btn-link favicon" }),
+            div({ style: "display: inline-block", class: "tab-title", onclick: (ev) => JumpToTab(tab.windowId, tab.id, ev) },
+                document.createTextNode(tab.title ?? tab.id?.toString() ?? "{oops}")),
+            img({ alt: "(jump to tab)", src: "img/jump-link.svg", class: "btn-link jump-to-tab", onclick: () => JumpToTab(tab.windowId, tab.id) }),
+            img({ alt: "(close tab)", src: "img/x-circle-close-delete.svg", class: "btn-link close-tab", onclick: () => CloseTab(tab.id) }),
+            // a({ href: tab.url },
+            //     document.createTextNode(tab.title ?? tab.id?.toString() ?? "{oops}"))
         )
     )
 }
@@ -129,10 +132,13 @@ function img(attribs: ImgAttribs) {
     return e;
 }
 
-function div(attribs: DivAttribs, ...children: HTMLElement[]) {
+function div(attribs: DivAttribs, ...children: Node[]) {
     const e = document.createElement("div");
     Object.entries(attribs).forEach(([name, value]) => e.setAttribute(name, value));
     children.forEach(c => { e.appendChild(c); e.append(" "); });
+    if (attribs.onclick) {
+        e.onclick = attribs.onclick
+    }
     return e;
 }
 
@@ -143,6 +149,7 @@ class ButtonAttribs {
 class DivAttribs {
     class?: string;
     style?: string;
+    onclick?: ((this: GlobalEventHandlers, ev: MouseEvent) => any) | null;
 }
 
 class ImgAttribs {
