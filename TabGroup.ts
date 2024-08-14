@@ -90,8 +90,8 @@ function tabComponent(tab: chrome.tabs.Tab) {
             div({ style: `background-image: url('${tab.favIconUrl}')`, class: "btn-link favicon" }),
             div({ style: "display: inline-block", class: "tab-title", onclick: (ev) => JumpToTab(tab.windowId, tab.id, ev) },
                 document.createTextNode(tab.title ?? tab.id?.toString() ?? "{oops}")),
-            img({ alt: "(jump to tab)", src: "img/jump-link.svg", class: "btn-link jump-to-tab", onclick: () => JumpToTab(tab.windowId, tab.id) }),
-            img({ alt: "(close tab)", src: "img/x-circle-close-delete.svg", class: "btn-link close-tab", onclick: () => CloseTab(tab.id) }),
+            // img({ alt: "(jump to tab)", src: "img/jump-link.svg", class: "btn-link jump-to-tab", onclick: () => JumpToTab(tab.windowId, tab.id) }),
+            div({ class: "btn-link close-tab", onclick: () => CloseTab(tab.id) }),
             // a({ href: tab.url },
             //     document.createTextNode(tab.title ?? tab.id?.toString() ?? "{oops}"))
         )
