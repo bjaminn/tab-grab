@@ -41,23 +41,40 @@ async function ListTabs() {
 async function RefreshTabs() {
     const tabGroups = await ListTabs();
     let root = div({ class: "columns" });
+    let tabDiff = 0;
 
     root.append(resetButton());
 
+    let columnLeft = div({ class: "column" });
+    let columnRight = div({ class: "column" });
+
     for (const tabGroup of tabGroups) {
-        root.append(
-            div({ class: "column" },
-                // h1(`${tabGroup.windowLabel} ${tabGroup.windowId}`),
-                ...(tabGroup.tabs.map(t => tabComponent(t)))
-            ))
+        // root.append(
+        //     div({ class: "column" },
+        //         ...(tabGroup.tabs.map(t => tabComponent(t)))
+        //     ))
+
+        let tabGroupDiv = div({ class: "tab-group" }, ...(tabGroup.tabs.map(t => tabComponent(t))))
+
+        if (tabDiff < 0) {
+            tabDiff += (tabGroup.tabs.length + 1);
+
+            columnRight.append(tabGroupDiv);
+        } else {
+            tabDiff -= (tabGroup.tabs.length + 1);
+
+            columnLeft.append(tabGroupDiv);
+        }
     }
 
+    root.append(columnLeft, columnRight);
+
     document.body.replaceChildren(root)
-    console.log("RefreshTabs()")
+    // console.log("RefreshTabs()")
 }
 
 async function JumpToTab(windowId?: number, tabId?: number, ev?: MouseEvent) {
-    console.log(ev);
+    // console.log(ev);
     if (!windowId) return;
     if (!tabId) return;
 
@@ -98,70 +115,12 @@ function tabComponent(tab: chrome.tabs.Tab) {
     )
 }
 
-function a(attribs: AAttribs, child?: Node) {
-    const e = document.createElement("a")
-    Object.entries(attribs).forEach(([name, value]) => e.setAttribute(name, value));
-    if (child) {
-        e.appendChild(child)
+chrome.runtime.onMessage.addListener(async function (message, sender, sendResponse) { 
+    if(message == "RefreshTabs"){
+        // console.log(sender)
+        // console.log(message)
+        RefreshTabs();
     }
-    return e;
-}
-
-function button(attribs: ButtonAttribs, ...children: Node[]) {
-    const e = document.createElement("button")
-    Object.entries(attribs).filter(([name, v]) => name != "onclick").forEach(([name, value]) => e.setAttribute(name, value));
-    if (attribs.onclick) {
-        e.onclick = attribs.onclick
-    }
-    children.forEach(c => { e.appendChild(c); e.append(" "); });
-    return e;
-}
-
-function h1(text: string) {
-    const h = document.createElement("H1");
-    h.appendChild(document.createTextNode(text));
-    return h;
-}
-
-function img(attribs: ImgAttribs) {
-    const e = document.createElement("img");
-    Object.entries(attribs).filter(([name, v]) => name != "onclick").forEach(([name, value]) => e.setAttribute(name, value));
-    if (attribs.onclick) {
-        e.onclick = attribs.onclick
-    }
-    return e;
-}
-
-function div(attribs: DivAttribs, ...children: Node[]) {
-    const e = document.createElement("div");
-    Object.entries(attribs).forEach(([name, value]) => e.setAttribute(name, value));
-    children.forEach(c => { e.appendChild(c); e.append(" "); });
-    if (attribs.onclick) {
-        e.onclick = attribs.onclick
-    }
-    return e;
-}
-
-class ButtonAttribs {
-    onclick?: ((this: GlobalEventHandlers, ev: MouseEvent) => any) | null;
-}
-
-class DivAttribs {
-    class?: string;
-    style?: string;
-    onclick?: ((this: GlobalEventHandlers, ev: MouseEvent) => any) | null;
-}
-
-class ImgAttribs {
-    alt?: string;
-    src?: string;
-    class?: string;
-    style?: string;
-    onclick?: ((this: GlobalEventHandlers, ev: MouseEvent) => any) | null;
-}
-
-class AAttribs {
-    href?: string;
-}
+});
 
 RefreshTabs();
