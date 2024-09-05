@@ -13,7 +13,7 @@ function createSingle<T extends OnClickAttrib>(tag: string, attribs?: T, ...chil
     if (attribs) {
         Object.entries(attribs).filter(([name, v]) => name != "onclick").forEach(([name, value]) => e.setAttribute(name, value));
         if (attribs.onclick) {
-            e.onclick = attribs.onclick;
+            e.onpointerdown = attribs.onclick
         }
     }
     children?.forEach(c => { e.appendChild(c); e.append(" "); });
@@ -21,7 +21,7 @@ function createSingle<T extends OnClickAttrib>(tag: string, attribs?: T, ...chil
 }
 
 class OnClickAttrib {
-    onclick?: ((this: GlobalEventHandlers, ev: MouseEvent) => any) | null;
+    onclick?: ((this: GlobalEventHandlers, ev: PointerEvent) => any) | null;
 }
 
 class ButtonAttribs extends OnClickAttrib { }

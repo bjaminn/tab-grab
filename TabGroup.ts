@@ -73,8 +73,20 @@ async function RefreshTabs() {
     // console.log("RefreshTabs()")
 }
 
-async function JumpToTab(windowId?: number, tabId?: number, ev?: MouseEvent) {
-    // console.log(ev);
+async function TabClick(windowId?: number, tabId?: number, ev?: MouseEvent) {
+    switch (ev?.button) {
+        case 0:
+            await JumpToTab(windowId, tabId);
+            break;
+        case 4:
+            await CloseTab(tabId);
+            break;
+        default:
+            break;
+    }
+}
+
+async function JumpToTab(windowId?: number, tabId?: number): Promise<void> {
     if (!windowId) return;
     if (!tabId) return;
 
@@ -105,7 +117,7 @@ function tabComponent(tab: chrome.tabs.Tab) {
     return (
         div({ class: "tab-box" },
             div({ style: `background-image: url('${tab.favIconUrl}')`, class: "btn-link favicon" }),
-            div({ style: "display: inline-block", class: "tab-title", onclick: (ev) => JumpToTab(tab.windowId, tab.id, ev) },
+            div({ style: "display: inline-block", class: "tab-title", onclick: (ev) => TabClick(tab.windowId, tab.id, ev) },
                 document.createTextNode(tab.title ?? tab.id?.toString() ?? "{oops}")),
             // img({ alt: "(jump to tab)", src: "img/jump-link.svg", class: "btn-link jump-to-tab", onclick: () => JumpToTab(tab.windowId, tab.id) }),
             div({ class: "btn-link close-tab", onclick: () => CloseTab(tab.id) }),
@@ -115,10 +127,8 @@ function tabComponent(tab: chrome.tabs.Tab) {
     )
 }
 
-chrome.runtime.onMessage.addListener(async function (message, sender, sendResponse) { 
-    if(message == "RefreshTabs"){
-        // console.log(sender)
-        // console.log(message)
+chrome.runtime.onMessage.addListener(async function (message, sender, sendResponse) {
+    if (message == "RefreshTabs") {
         RefreshTabs();
     }
 });
