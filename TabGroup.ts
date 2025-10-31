@@ -10,6 +10,8 @@ class TabGroup {
     tabs: chrome.tabs.Tab[];
 }
 
+var youtube = false;
+
 async function GetTabs() {
     const currentWindowTab = await chrome.tabs.query({ currentWindow: true });
     const otherWindowsTabs = await chrome.tabs.query({ currentWindow: false });
@@ -19,11 +21,22 @@ async function GetTabs() {
 
 async function ListTabs() {
     const tabs = await GetTabs();
+    const urlCount: Record<string, number> = {}
     const tabGroups = new Map<number, TabGroup>()
+    const youtubes = new TabGroup(141412412, "YouTubes", [])
 
     for (const tab of tabs) {
         if (!tabGroups.has(tab.windowId)) {
             tabGroups.set(tab.windowId, new TabGroup(tab.windowId, "{undefined}", []))
+        }
+
+        if (tab.url) {
+            const count = urlCount[tab.url] + 1
+            urlCount[tab.url] = count
+            let idx = tab.url.indexOf('youtube.com')
+            if (idx >= 0) {
+                youtubes.tabs.push(tab)
+            }
         }
 
         let current = tabGroups.get(tab.windowId);
@@ -33,9 +46,16 @@ async function ListTabs() {
         current.tabs.push(tab);
     }
 
+    tabGroups.set(youtubes.windowId, youtubes)
+
     const windows = Array.from(tabGroups).map(([_, tg]) => tg)
 
     return windows;
+}
+
+async function SelectYouTube() {
+    youtube = !youtube;
+    RefreshTabs();
 }
 
 async function RefreshTabs() {
@@ -53,6 +73,12 @@ async function RefreshTabs() {
         //     div({ class: "column" },
         //         ...(tabGroup.tabs.map(t => tabComponent(t)))
         //     ))
+
+        let isYoutubes = tabGroup.windowLabel == "YouTubes";
+
+        if ((isYoutubes && !youtube) || (!isYoutubes && youtube)) {
+            continue;
+        }
 
         let tabGroupDiv = div({ class: "tab-group" }, ...(tabGroup.tabs.map(t => tabComponent(t))))
 
@@ -108,6 +134,9 @@ function resetButton() {
         div({ class: "toolbar" },
             button({ onclick: RefreshTabs },
                 document.createTextNode("refresh")
+            ),
+            button({ onclick: SelectYouTube },
+                document.createTextNode(youtube ? "switch to all" : "switch to youtube")
             )
         )
     )

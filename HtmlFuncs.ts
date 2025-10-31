@@ -2,11 +2,20 @@ function a(attribs: AAttribs, child: Node) { return createSingle("a", attribs, c
 
 function button(attribs: ButtonAttribs, ...children: Node[]) { return createSingle("button", attribs, ...children); }
 
+function checkbox(attribs: CheckboxAttribs, ...children: Node[]) {
+    let e = createSingle("input", attribs, ...children)
+    e.setAttribute("type", "checkbox");
+    return e;
+}
+
 function div(attribs: DivAttribs, ...children: Node[]) { return createSingle("div", attribs, ...children) }
 
 function h1(text: string) { return createSingle("h1", undefined, document.createTextNode(text)) }
 
 function img(attribs: ImgAttribs) { return createSingle("img", attribs); }
+
+function label(attribs: LabelAttribs, ...children: Node[]) { return createSingle("label", attribs, ...children); }
+
 
 function createSingle<T extends OnClickAttrib>(tag: string, attribs?: T, ...children: Node[]) {
     const e = document.createElement(tag);
@@ -25,6 +34,14 @@ class OnClickAttrib {
 }
 
 class ButtonAttribs extends OnClickAttrib { }
+
+class CheckboxAttribs extends OnClickAttrib {
+    name?: string;
+}
+
+class LabelAttribs extends OnClickAttrib {
+    for?: string;
+}
 
 class DivAttribs extends OnClickAttrib {
     class?: string;
